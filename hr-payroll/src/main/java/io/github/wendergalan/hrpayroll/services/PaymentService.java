@@ -2,32 +2,26 @@ package io.github.wendergalan.hrpayroll.services;
 
 import io.github.wendergalan.hrpayroll.entities.Payment;
 import io.github.wendergalan.hrpayroll.entities.Worker;
+import io.github.wendergalan.hrpayroll.feignclients.WorkerFeignClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-    private final RestTemplate restTemplate;
-
-    @Value("${hr-worker.host}")
-    private String workerHost;
+    private final WorkerFeignClient workerFeignClient;
 
     public Payment getPayment(long workerId, int days) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("id", String.valueOf(workerId));
+        ResponseEntity worker = workerFeignClient.findById(workerId);
 
-        Worker worker = restTemplate.getForObject(workerHost + "/workers/{id}", Worker.class, uriVariables);
-
-        return Payment.builder()
-                .name(worker.getName())
-                .dailyIncome(worker.getDailyIncome())
-                .days(days)
-                .build();
+        if (worker.getStatusCode() == HttpStatus.OK && worker.getBody() != null)
+            return Payment.builder()
+                    .name(((Worker) worker.getBody()).getName())
+                    .dailyIncome(((Worker) worker.getBody()).getDailyIncome())
+                    .days(days)
+                    .build();
+        return null;
     }
 }
