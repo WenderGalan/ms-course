@@ -4,6 +4,7 @@ import io.github.wendergalan.hrworker.entities.Worker;
 import io.github.wendergalan.hrworker.repositories.WorkerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,15 @@ import java.util.Optional;
 public class WorkerResource {
     private final WorkerRepository repository;
     private final Environment env;
+
+    @Value("${test.config}")
+    private String testConfig;
+
+    @GetMapping(value = "/configs")
+    public ResponseEntity<Void> buscarConfiguracoes() {
+        log.info("CONFIG = " + testConfig);
+        return ResponseEntity.noContent().build();
+    }
 
     @GetMapping
     public ResponseEntity<List<Worker>> findAll() {
