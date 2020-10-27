@@ -1,0 +1,126 @@
+# Tem que verificar se está funcionando corretamente
+version: '3.4'
+services:
+  hr-worker-pg12:
+    image: postgres:12-alpine
+    container_name: "hr-worker-pg12"
+    restart: on-failure
+    environment:
+      - POSTGRES_PASSWORD=1234567
+      - POSTGRES_DB=db_hr_worker
+    ports:
+      - 5432:5432
+    networks:
+      - hr-net
+
+  hr-user-pg12:
+      image: postgres:12-alpine
+      container_name: "hr-user-pg12"
+      restart: on-failure
+      environment:
+        - POSTGRES_PASSWORD=1234567
+        - POSTGRES_DB=db_hr_user
+      ports:
+        - 5432:5432
+      networks:
+        - hr-net
+
+  hr-config-server:
+    image: hr-config-server
+    container_name: "hr-config-server:v1"
+    restart: on-failure
+    environment:
+      - GITHUB_USER=SEU_USER
+      - GITHUB_PASS=SUA_SENHA
+    build:
+      context: ./hr-config-server
+      dockerfile: ./Dockerfile
+    ports:
+      - 8888:8888
+    command: mvn spring-boot:run
+    networks:
+      - hr-net
+
+  hr-eureka-server:
+    image: hr-eureka-server
+    container_name: "hr-eureka-server:v1"
+    restart: on-failure
+    build:
+      context: ./hr-eureka-server
+      dockerfile: ./Dockerfile
+    ports:
+      - 8761:8761
+    command: mvn spring-boot:run
+    networks:
+      - hr-net
+
+  hr-api-gateway-zuul:
+    image: hr-api-gateway-zuul
+    container_name: "hr-api-gateway-zuul:v1"
+    restart: on-failure
+    build:
+      context: ./hr-api-gateway-zuul
+      dockerfile: ./Dockerfile
+    ports:
+      - 8765:8765
+    command: mvn spring-boot:run
+    depends_on:
+      - hr-eureka-server
+    networks:
+      - hr-net
+
+  hr-worker:
+    image: hr-worker
+    container_name: "hr-worker:v1"
+    restart: on-failure
+    build:
+      context: ./hr-worker
+      dockerfile: ./Dockerfile
+    command: mvn spring-boot:run
+    depends_on:
+      - hr-worker-pg12
+    networks:
+      - hr-net
+
+  hr-user:
+    image: hr-user
+    container_name: "hr-user:v1"
+    restart: on-failure
+    build:
+      context: ./hr-user
+      dockerfile: ./Dockerfile
+    command: mvn spring-boot:run
+    depends_on:
+      - hr-user-pg12
+    networks:
+      - hr-net
+
+  hr-payroll:
+    image: hr-payroll
+    container_name: "hr-payroll:v1"
+    restart: on-failure
+    build:
+      context: ./hr-payroll
+      dockerfile: ./Dockerfile
+    command: mvn spring-boot:run
+    depends_on:
+      - hr-worker-pg12
+    networks:
+      - hr-net
+
+  hr-oauth:
+    image: hr-oauth
+    container_name: "hr-oauth:v1"
+    restart: on-failure
+    build:
+      context: ./hr-oauth
+      dockerfile: ./Dockerfile
+    command: mvn spring-boot:run
+    depends_on:
+      - hr-user-pg12
+    networks:
+      - hr-net
+
+networks:
+  hr-net:
+    driver: bridge
