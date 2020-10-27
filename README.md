@@ -2,8 +2,11 @@
 
 The project consists of creating an HR application to pay workers and test their knowledge with spring cloud libraries.
 
-
 Course information can be found in the Original Readme and also in the Docker Readme.
+
+- ### The structure of the project
+[![Estrutura](https://github.com/WenderGalan/ms-course/blob/main/estrutura.jpg?raw=true)](https://github.com/WenderGalan/ms-course)
+[![EstruturaDocker](https://github.com/WenderGalan/ms-course/blob/main/estrutura_docker.jpg?raw=true)](https://github.com/WenderGalan/ms-course)
 
 - ### License:
 ```
