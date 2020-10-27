@@ -25,12 +25,12 @@ public class WorkerResource {
     private final WorkerRepository repository;
     private final Environment env;
 
-    @Value("${test.config}")
-    private String testConfig;
+//    @Value("${test.config}")
+//    private String testConfig;
 
     @GetMapping(value = "/configs")
     public ResponseEntity<Void> buscarConfiguracoes() {
-        log.info("CONFIG = " + testConfig);
+//        log.info("CONFIG = " + testConfig);
         return ResponseEntity.noContent().build();
     }
 
